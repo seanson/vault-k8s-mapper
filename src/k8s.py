@@ -1,6 +1,7 @@
 import logging
-from kubernetes import client, config
+from base64 import b64encode
 
+from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
 # Configure API key authorization: BearerToken
@@ -17,8 +18,12 @@ def create_or_update_secret(name, namespace, data):
     configuration = client.Configuration()
     api_instance = client.CoreV1Api(client.ApiClient(configuration))
 
+    # Secrets must be base64 encoded prior to entry
+    encoded_data = {
+        key: b64encode(value).decode("ascii") for key, value in data.items()
+    }
     metadata = client.V1ObjectMeta(name=name, namespace=namespace)
-    body = client.V1Secret(data=data, metadata=metadata)
+    body = client.V1Secret(data=encoded_data, metadata=metadata)
     try:
         api_instance.read_namespaced_secret(name, namespace)
         logger.info("Secret %s found in %s namespace, updating.", name, namespace)

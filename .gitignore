@@ -2,3 +2,5 @@
 config.yaml
 .vscode
 **/*.pyc
+.coverage
+htmlcov
