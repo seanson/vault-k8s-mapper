@@ -1,3 +1,7 @@
+### 0.3.0
+
+- **Breaking** Set secret update method to "replace" rather than "patch" so deleted Vault secrets will no longer be present
+
 ### 0.2.4
 
 - Reworked internal representation of vault path parsing

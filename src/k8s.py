@@ -8,7 +8,7 @@ from kubernetes.client.rest import ApiException
 logger = logging.getLogger("vault-k8s-mapper")
 
 
-def create_or_update_secret(name, namespace, data):
+def create_or_update_secret(name, namespace, data, ):
     try:
         config.load_incluster_config()
     except:
@@ -27,7 +27,7 @@ def create_or_update_secret(name, namespace, data):
     try:
         api_instance.read_namespaced_secret(name, namespace)
         logger.info("Secret %s found in %s namespace, updating.", name, namespace)
-        api_instance.patch_namespaced_secret(name=name, namespace=namespace, body=body)
+        api_instance.replace_namespaced_secret(name=name, namespace=namespace, body=body)
     except ApiException as e:
         if e.reason == "Not Found":
             logger.info(
