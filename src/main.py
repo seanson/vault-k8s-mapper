@@ -26,7 +26,7 @@ REQUIRED_ENV_VARS = (
     "SECRET_SOURCES",
 )
 
-DEFAULT_CONFIG = {}
+DEFAULT_CONFIG = {"DEFAULT_KEY": "value"}
 
 def get_config():
     config = DEFAULT_CONFIG.copy()

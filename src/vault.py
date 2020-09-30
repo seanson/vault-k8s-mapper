@@ -90,15 +90,29 @@ def get_secrets(config, sources, token):
                     continue
                 sub_path = f"{path}{sub_key}"
                 logger.info("Found sub-path %s", sub_path)
-                secret_response = client.secrets.kv.v2.read_secret_version(
-                    path=sub_path
-                )
+                try:
+                    secret_response = client.secrets.kv.v2.read_secret_version(
+                        path=sub_path
+                    )
+                except hvac.exceptions.InvalidPath:
+                    logger.warning("Sub-path %s metadata exists but contains no data, skipping.", sub_path)
+                    continue
+                if key not in secret_response["data"]["data"]:
+                    logger.warning("Sub-path %s missing key %s, skipping", sub_path, key)
+                    continue
                 data = secret_response["data"]["data"][key].encode("ascii")
 
                 secrets[f"{key_prefix}{sub_key}"] = data
         else:
             logger.info("Found direct path, fetching secret %s", path)
-            secret_response = client.secrets.kv.v2.read_secret_version(path=path)
+            try:
+                secret_response = client.secrets.kv.v2.read_secret_version(path=path)
+            except hvac.exceptions.InvalidPath:
+                logger.critical("Sub-path %s metadata exists but contains no data, skipping.", path)
+                raise
+            if key not in secret_response["data"]["data"]:
+                logger.warning("Path %s missing key %s, skipping", path, key)
+                continue
             data = secret_response["data"]["data"][key].encode("ascii")
             env_key = path.split("/").pop()
             if target is not None:
